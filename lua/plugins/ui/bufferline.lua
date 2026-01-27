@@ -5,8 +5,10 @@ local function config(bufferline)
         bufferline.style_preset.no_italic,
         bufferline.style_preset.no_bold
       },
+      -- Use Snacks.bufdelete to preserve window layout when closing buffers
+      close_command = function(n) Snacks.bufdelete(n) end,
       offsets = {
-        { filetype = "NvimTree" }
+        { filetype = "neo-tree", text = "File Explorer", highlight = "Directory", text_align = "left" }
       },
       groups = {
         items = { require('bufferline.groups').builtin.pinned:with({ icon = "  " }) }

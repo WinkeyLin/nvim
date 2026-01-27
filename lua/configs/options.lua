@@ -1,48 +1,51 @@
 -- ====== Appearance ======
--- 显示行号
+-- Show line numbers
 vim.o.number = true
--- 显示相对行号
+-- Show relative line numbers
 vim.o.relativenumber = true
--- 高亮所在行
+-- Highlight the current line
 vim.o.cursorline = true
--- 开启真彩色支持
+-- Enable true color support
 vim.o.termguicolors = true
 
 -- ====== Coding ======
 -- translate all <Tab> to spaces
 vim.o.expandtab = true
--- 智能 Tab
+-- Smart Tab
 vim.o.smarttab = true
--- Tab 缩进 2 个空格
+-- Tab width: 2 spaces
 vim.o.tabstop = 2
 
--- 新行自动缩进
+-- Auto-indent new lines
 vim.o.autoindent = true
--- 智能缩进
+-- Smart indent
 vim.o.smartindent = true
 -- change the indent width
 vim.o.shiftwidth = 2
 
--- 搜索大小写不敏感，除非包含大写
+-- Case-insensitive search unless the pattern contains uppercase
 vim.o.ignorecase = true
 vim.o.smartcase = true
--- 光标在行首尾时<Left><Right>可以跳到下一行
+-- Allow <Left>/<Right> to wrap to the previous/next line
 vim.o.whichwrap = "<,>,[,]"
 
--- 开启文件类型检测和缩进
-vim.cmd("filetype indent on")
--- 语法高亮
-vim.cmd("syntax on")
-
 -- ====== Misc ======
--- 鼠标支持
+-- Enable mouse support
 vim.o.mouse = "a"
--- 当文件被外部程序修改时自动加载
+-- Open new vertical splits to the right and horizontal splits below
+vim.o.splitright = true
+vim.o.splitbelow = true
+-- Prefer using already open windows and tabs when switching buffers
+vim.o.switchbuf = "useopen,usetab"
+-- Auto-reload files changed outside of Neovim
 vim.o.autoread = true
--- 禁用原生状态栏
+-- Disable the built-in mode indicator (use statusline instead)
 vim.o.showmode = false
--- 禁用交换文件
+-- Disable swap files
 vim.o.swapfile = false
+
+-- Show a clear vertical separator between windows (e.g. neo-tree and editor)
+vim.opt.fillchars:append({ vert = "│" })
 
 -- ====== Clipboard ======
 -- https://www.sxrhhh.top/blog/2024/06/06/neovim-copy-anywhere
@@ -50,14 +53,14 @@ vim.o.swapfile = false
 vim.o.clipboard = "unnamedplus"
 
 local function paste(reg)
-	-- 返回寄存器的内容，用来作为 p 操作符的粘贴物
-	return function(lines)
-		local content = vim.fn.getreg('"')
+	-- Return the register content to use as the pasted text for the `p` operator
+	return function()
+		local content = vim.fn.getreg(reg)
 		return vim.split(content, "\n")
 	end
 end
 
--- 如果是 SSH 环境，使用 OSC-52 协议传输剪贴板
+-- In an SSH session, use the OSC52 protocol to access the clipboard
 if os.getenv("SSH_TTY") then
 	vim.g.clipboard = {
 		name = "OSC 52",

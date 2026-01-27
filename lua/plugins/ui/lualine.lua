@@ -7,42 +7,39 @@ local function getIconFilename()
 	end
 	local icon = "󰈚"
 	local filetype = vim.bo.filetype
-	if filetype ~= "" then
-		local devicon = require("nvim-web-devicons").get_icon(filename, filetype)
-		icon = devicon or icon
+		if filetype ~= "" then
+			local devicon = require("nvim-web-devicons").get_icon(filename, filetype)
+			icon = devicon or icon
+		end
+		-- Add modified-status indicator
+		local status = vim.bo.modified and " " or ""
+		return string.format("%s %s%s", icon, filename, status)
 	end
-	-- 添加修改状态指示
-	local status = vim.bo.modified and " " or ""
-	return string.format("%s %s%s", icon, filename, status)
-end
 
 local function getLspInfo()
-	local buf_ft = vim.api.nvim_get_option_value("filetype", { buf = 0 })
-	local clients = vim.lsp.get_clients()
-	if next(clients) == nil then
+	local clients = vim.lsp.get_clients({ bufnr = 0 })
+	if #clients == 0 then
 		return ""
 	end
+	local names = {}
 	for _, client in ipairs(clients) do
-		local filetypes = client.config.filetypes
-		if filetypes and vim.fn.index(filetypes, buf_ft) ~= -1 then
-			return client.name
-		end
+		names[#names + 1] = client.name
 	end
-	return ""
-end
+	return table.concat(names, ", ")
+	end
 
-local function getDir()
-	-- 获取当前工作目录路径
-	local cwd = vim.uv.cwd()
-	-- 获取目录名
-	return cwd:match("([^/\\]+)[/\\]*$") or cwd
-end
+	local function getDir()
+		-- Get current working directory
+		local cwd = vim.uv.cwd()
+		-- Get directory name
+		return cwd:match("([^/\\]+)[/\\]*$") or cwd
+	end
 
--- 显示当前光标所在的行号/总行数:列号
-local function getPosition()
-	local line = vim.fn.line(".")
-	local col = vim.fn.col(".")
-	local totalLines = vim.fn.line("$")
+	-- Show current line/total lines:column
+	local function getPosition()
+		local line = vim.fn.line(".")
+		local col = vim.fn.col(".")
+		local totalLines = vim.fn.line("$")
 	local progress = function()
 		if line == 1 then
 			return "TOP"
@@ -62,8 +59,8 @@ end
 local config = {
 	options = {
 		theme = "catppuccin",
-		disabled_filetypes = { "NvimTree" },
-		extensions = { "nvim-tree" },
+		disabled_filetypes = { "neo-tree" },
+		extensions = { "neo-tree" },
 		section_separators = { left = "", right = "" },
 		component_separators = { left = "", right = "" },
 		highlight_options = { bold = false },
@@ -72,14 +69,14 @@ local config = {
 		lualine_a = { { "mode", padding = { left = 1, right = 0 } } },
 		lualine_b = {
 			{
-				getIconFilename,
-				padding = { left = 1, right = 0 },
-				on_clink = function()
-					vim.cmd("NvimTreeToggle<CR>")
-				end,
-				cond = function ()
-					return vim.api.nvim_win_get_width(0) > 70
-				end,
+					getIconFilename,
+					padding = { left = 1, right = 0 },
+					on_click = function()
+						vim.cmd("Neotree toggle")
+					end,
+					cond = function ()
+						return vim.api.nvim_win_get_width(0) > 70
+					end,
 			},
 		},
 		lualine_c = { "branch" },

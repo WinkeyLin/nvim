@@ -1,4 +1,6 @@
 .vscode/
+.claude/
+
 bak/*
 
-test.lua
+test*

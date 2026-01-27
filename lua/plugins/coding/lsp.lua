@@ -1,18 +1,19 @@
--- LSP 代码错误提示
+-- LSP diagnostics (signs & display options)
+local diagnostic_signs = {
+	[vim.diagnostic.severity.ERROR] = "󰅙",
+	[vim.diagnostic.severity.WARN] = "",
+	[vim.diagnostic.severity.HINT] = "󰌵",
+	[vim.diagnostic.severity.INFO] = "󰋼",
+}
+
 vim.diagnostic.config({
-	--  在代码后显示文字错误提示
+	-- Show diagnostic text inline (virtual text)
 	virtual_text = true,
-	-- 在代号处显示图标错误提示
-	signs = true,
-	-- 在输入模式下也显示提示
+	-- Show diagnostic icons in the sign column
+	signs = { text = diagnostic_signs },
+	-- Update diagnostics in insert mode
 	update_in_insert = true,
 })
--- 自定义错误提示图标
-local signs = { Error = "󰅙", Warn = "", Hint = "󰌵", Info = "󰋼" }
-for type, icon in pairs(signs) do
-	local hl = "DiagnosticSign" .. type
-	vim.fn.sign_define(hl, { text = icon, texthl = hl, numhl = hl })
-end
 
 local masonConfig = {
 	-- Where Mason should put its bin location in your PATH
@@ -30,63 +31,68 @@ local masonConfig = {
 return {
 	-- LSP Server manger
 	{
-		"williamboman/mason.nvim",
+		"mason-org/mason.nvim",
 		cmd = { "Mason", "MasonInstall", "MasonUpdate" },
 		opts = masonConfig,
 	},
-	{ "neovim/nvim-lspconfig" },
+	{ "neovim/nvim-lspconfig", dependencies = { "saghen/blink.cmp" } },
 	{
-		"williamboman/mason-lspconfig.nvim",
-		dependencies = { "williamboman/mason.nvim", "neovim/nvim-lspconfig" },
-		cmd = { "LspInfo" },
+		"mason-org/mason-lspconfig.nvim",
+		dependencies = { "mason-org/mason.nvim", "neovim/nvim-lspconfig" },
 		event = { "BufReadPost", "BufNewFile" },
-		config = function()
-			require("mason-lspconfig").setup({
-				ensure_installed = { "ts_ls", "lua_ls", "jsonls" },
-				automatic_enable = true,
-			})
-
-			-- 使用新的 vim.lsp.config API 配置 LSP 服务器
+		opts = {
+			ensure_installed = { "ts_ls", "lua_ls", "jsonls" },
+			-- mason-lspconfig v2: only auto-enable the servers you want.
+			-- This also prevents accidentally enabling non-LSP tools.
+			automatic_enable = { "ts_ls", "lua_ls", "jsonls" },
+		},
+		config = function(_, opts)
 			local on_attach = function(_, bufnr)
 				require("configs.keymap").lsp(bufnr)
 			end
-			local capabilities = vim.lsp.protocol.make_client_capabilities()
 
-			-- 为 lua_ls 添加特殊配置，使用新的 vim.lsp.config API
-			vim.lsp.config('lua_ls', {
-				cmd = { 'lua-language-server' },
-				filetypes = { 'lua' },
+			local capabilities = vim.lsp.protocol.make_client_capabilities()
+			local ok_blink, blink_cmp = pcall(require, "blink.cmp")
+			if ok_blink then
+				capabilities = blink_cmp.get_lsp_capabilities(capabilities)
+			end
+
+			-- Nvim 0.11+: define client configs via `vim.lsp.config()`,
+			-- then let mason-lspconfig auto-enable selected servers via `vim.lsp.enable()`.
+			vim.lsp.config("*", {
 				on_attach = on_attach,
 				capabilities = capabilities,
+			})
+
+			vim.lsp.config("lua_ls", {
 				settings = {
 					Lua = {
-						runtime = {
-							version = 'LuaJIT',
-						},
+						runtime = { version = "LuaJIT" },
 						diagnostics = {
-							globals = { 'vim', 'require' },
+							-- Globally treat `vim` as a defined global in all Lua projects.
+							globals = { "vim" },
 						},
 						workspace = {
-							library = vim.api.nvim_get_runtime_file("", true),
 							checkThirdParty = false,
+							-- Keep this lightweight; pulling in full runtimepath can be very slow.
+							library = { vim.env.VIMRUNTIME },
 						},
-						telemetry = {
-							enable = false,
-						},
+						telemetry = { enable = false },
 					},
 				},
 			})
 
-			-- 为其他服务器设置通用配置
-			vim.lsp.config('ts_ls', {
-				on_attach = on_attach,
-				capabilities = capabilities,
-			})
-
-			vim.lsp.config('jsonls', {
-				on_attach = on_attach,
-				capabilities = capabilities,
-			})
+			require("mason-lspconfig").setup(opts)
+		end,
+	},
+	-- Better diagnostics list
+	{
+		"folke/trouble.nvim",
+		event = "VeryLazy",
+		opts = {},
+		config = function(_, opts)
+			require("trouble").setup(opts)
+			require("configs.keymap").trouble()
 		end,
 	},
 }
