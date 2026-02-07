@@ -184,8 +184,8 @@ plugins.lsp = function(bufnr)
 	map("<leader>gr", "<cmd>lua vim.lsp.buf.references()<CR>", "Go to References", "n", optLSP)
 	-- diagnostic
 	map("<leader>go", "<cmd>lua vim.diagnostic.open_float()<CR>", "Open Diagnostic Float", "n", optLSP)
-	map("<leader>gp", "<cmd>lua vim.diagnostic.goto_prev()<CR>", "Go to Previous Diagnostic", "n", optLSP)
-	map("<leader>gn", "<cmd>lua vim.diagnostic.goto_next()<CR>", "Go to Next Diagnostic", "n", optLSP)
+	map("<leader>gp", "<cmd>lua vim.diagnostic.jump({count=-1, float=true})<CR>", "Go to Previous Diagnostic", "n", optLSP)
+	map("<leader>gn", "<cmd>lua vim.diagnostic.jump({count=1, float=true})<CR>", "Go to Next Diagnostic", "n", optLSP)
 end
 
 -- trouble

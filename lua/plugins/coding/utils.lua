@@ -16,7 +16,7 @@ return {
 		-- event = { "BufReadPre */chezmoi/*" },
 		init = function()
 			vim.g["chezmoi#use_tmp_buffer"] = true
-			vim.g["chezmoi#source_dir_path"] = "/home/kanro/code/chezmoi/home/"
+			vim.g["chezmoi#source_dir_path"] = os.getenv("HOME") .. "/code/chezmoi/home/"
 		end,
 	},
 	-- {
