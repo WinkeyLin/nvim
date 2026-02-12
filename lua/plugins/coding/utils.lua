@@ -16,7 +16,9 @@ return {
 		-- event = { "BufReadPre */chezmoi/*" },
 		init = function()
 			vim.g["chezmoi#use_tmp_buffer"] = true
-			vim.g["chezmoi#source_dir_path"] = os.getenv("HOME") .. "/code/chezmoi/home/"
+			-- Keep this path portable across Linux/macOS/Windows environments.
+			local home = vim.env.HOME or vim.env.USERPROFILE or vim.fn.expand("~")
+			vim.g["chezmoi#source_dir_path"] = home:gsub("\\", "/") .. "/.config/chezmoi/home/"
 		end,
 	},
 	-- {
