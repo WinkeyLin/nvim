@@ -10,7 +10,7 @@ vim.api.nvim_create_autocmd("VimEnter", {
 			if require("lazy.status").has_updates then
 				require("lazy").update({
 					show = false,
-					-- 当某个插件更新时调用
+					-- Called when a plugin is updated
 					on_updated = function(plugin)
 						vim.api.nvim_echo({ { "Updating plugin: " .. plugin.name, "InfoMsg" } }, true, {})
 					end,
@@ -30,3 +30,11 @@ vim.api.nvim_create_autocmd("BufEnter", {
 	end,
 })
 
+-- Ensure window separators stay visible even after colorscheme changes.
+vim.api.nvim_create_autocmd("ColorScheme", {
+	group = augroup("win_separator"),
+	callback = function()
+		vim.api.nvim_set_hl(0, "WinSeparator", { link = "LineNr" })
+		vim.api.nvim_set_hl(0, "VertSplit", { link = "WinSeparator" })
+	end,
+})

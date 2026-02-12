@@ -1,6 +1,6 @@
 -- https://github.com/folke/snacks.nvim
 
--- 判断窗口宽度是否大于 70
+-- Check whether the window is wider than 70 columns
 local isWide = vim.api.nvim_win_get_width(0) > 70
 
 local dbConfig = {
@@ -12,7 +12,7 @@ local dbConfig = {
 	preset = {
 		keys = {
 			{ icon = "󱪞 ", desc = "New File", key = "n", action = ":ene | startinsert" },
-			{ icon = " ", desc = "Open Files Tree", key = "o", action = ":NvimTreeToggle" },
+			{ icon = " ", desc = "Open Files Tree", key = "o", action = ":Neotree toggle" },
 			{ icon = " ", desc = "Recent Files", action = ":lua Snacks.dashboard.pick('oldfiles')", key = "r" },
 			{ icon = "󰮗 ", desc = "Find Files", action = ":lua Snacks.dashboard.pick('files')", key = "f" },
 			{ icon = "󱎸 ", desc = "Find Texts", action = ":lua Snacks.dashboard.pick('live_grep')", key = "t" },
@@ -82,6 +82,11 @@ local config = {
 	words = { enabled = true },
 	notifier = notifierConfig,
 	scope = { enabled = true },
+	-- Git integration
+	lazygit = { enabled = true },
+	git = { enabled = true },
+	-- LSP rename with file references update
+	rename = { enabled = true },
 }
 
 return {

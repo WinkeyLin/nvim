@@ -1,41 +1,3 @@
-local cmpConfig = function()
-	local cmp = require "cmp"
-	local options = {
-		-- 补全菜单将始终显示，即使只有一个匹配项
-		completion = { completeopt = "menu,menuone" },
-		snippet = {
-			expand = function(args)
-				require("luasnip").lsp_expand(args.body)
-			end,
-		},
-		sources = {
-			{ name = "nvim_lsp" },
-			{ name = "luasnip" },
-			{ name = "buffer" },
-			{ name = "nvim_lua" },
-			{ name = "path" },
-		},
-		mapping = require("configs.keymap").cmp(cmp)
-	}
-	-- / 查找模式使用 buffer 源
-	cmp.setup.cmdline("/", {
-		mapping = require("configs.keymap").cmp(cmp),
-		sources = {
-			{ name = "buffer" },
-		},
-	})
-	-- : 命令行模式中使用 path 和 cmdline 源
-	cmp.setup.cmdline(":", {
-		mapping = require("configs.keymap").cmp(cmp),
-		sources = cmp.config.sources({
-			{ name = "path" },
-		}, {
-			{ name = "cmdline" },
-		}),
-	})
-	return options
-end
-
 local luasnipSetup = function()
 	require("luasnip.loaders.from_vscode").lazy_load { exclude = vim.g.vscode_snippets_exclude or {} }
 	require("luasnip.loaders.from_vscode").lazy_load { paths = vim.g.vscode_snippets_path or "" }
@@ -59,13 +21,15 @@ end
 
 return {
 	{
-		"hrsh7th/nvim-cmp",
+		"saghen/blink.cmp",
 		event = { "InsertEnter", "CmdlineEnter" },
+		version = "1.*",
 		dependencies = {
 			{
 				-- snippet plugin
 				"L3MON4D3/LuaSnip",
 				dependencies = "rafamadriz/friendly-snippets",
+				version = "v2.*",
 				opts = { history = true, updateevents = "TextChanged,TextChangedI" },
 				config = function(_, opts)
 					require("luasnip").config.set_config(opts)
@@ -83,24 +47,58 @@ return {
 				},
 				config = function(_, opts)
 					require("nvim-autopairs").setup(opts)
-					-- setup cmp for autopairs
-					-- cmp 补全时自动插入括号
-					local cmp_autopairs = require "nvim-autopairs.completion.cmp"
-					require("cmp").event:on("confirm_done", cmp_autopairs.on_confirm_done())
 				end
 			},
-			-- cmp sources plugins
-			{
-				"saadparwaiz1/cmp_luasnip",
-				"hrsh7th/cmp-nvim-lua",
-				"hrsh7th/cmp-nvim-lsp",
-				"hrsh7th/cmp-buffer",
-				"hrsh7th/cmp-path",
-				"hrsh7th/cmp-cmdline"
-			},
 		},
-		config = function()
-			require("cmp").setup(cmpConfig())
-		end
+		opts = {
+			appearance = {
+				use_nvim_cmp_as_default = true,
+				nerd_font_variant = "mono",
+			},
+			keymap = {
+				preset = "none",
+				["<C-Space>"] = { "show", "show_documentation", "hide_documentation" },
+				["<Esc>"] = { "hide", "fallback" },
+				["<Up>"] = { "select_prev", "fallback" },
+				["<Down>"] = { "select_next", "fallback" },
+				["<C-u>"] = { "scroll_documentation_up", "fallback" },
+				["<C-d>"] = { "scroll_documentation_down", "fallback" },
+				["<CR>"] = { "select_and_accept", "fallback" },
+			},
+			completion = {
+				documentation = { auto_show = true, auto_show_delay_ms = 200 },
+				list = {
+					selection = {
+						preselect = true,
+						auto_insert = false,
+					},
+				},
+				ghost_text = { enabled = false },
+			},
+			snippets = { preset = "luasnip" },
+			sources = {
+				default = { "lsp", "path", "snippets", "buffer" },
+			},
+			cmdline = {
+				enabled = true,
+				keymap = {
+					preset = "none",
+					["<C-Space>"] = { "show" },
+					["<Esc>"] = { "hide", "fallback" },
+					["<Up>"] = { "select_prev", "fallback" },
+					["<Down>"] = { "select_next", "fallback" },
+					["<CR>"] = { "select_and_accept", "fallback" },
+				},
+				completion = { menu = { auto_show = true } },
+			},
+			-- Avoid extra downloads/builds; keep behavior stable in restricted networks.
+			fuzzy = { implementation = "lua" },
+		},
+	},
+	-- surround: add/change/delete surrounding pairs
+	{
+		"kylechui/nvim-surround",
+		event = "VeryLazy",
+		opts = {},
 	},
 }
