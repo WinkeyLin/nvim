@@ -58,7 +58,7 @@ end
 
 local config = {
 	options = {
-		theme = "catppuccin",
+		theme = "catppuccin-nvim",
 		disabled_filetypes = { "neo-tree" },
 		extensions = { "neo-tree" },
 		section_separators = { left = "", right = "" },

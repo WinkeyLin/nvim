@@ -4,8 +4,9 @@ Kanro's Neovim setup powered by `lazy.nvim`, focused on fast startup, clean UI, 
 
 ## Requirements
 
-- Neovim `>= 0.11` (this config uses `vim.lsp.config()` APIs)
+- Neovim `>= 0.12` (required by the current `nvim-treesitter` branch)
 - `git`
+- `tree-sitter-cli >= 0.26.1` and a C compiler for Treesitter parsers
 - A Nerd Font (for icons in statusline/file tree)
 - Optional but recommended:
   - `ripgrep` for `Telescope live_grep`
@@ -64,7 +65,7 @@ On first launch, `lazy.nvim` is bootstrapped automatically and plugins are insta
   - `jsonls`
 - Formatting (`conform.nvim`):
   - Lua: `stylua`
-  - JavaScript: `prettier`
+  - JavaScript, TypeScript, CSS, HTML, JSON, YAML, and Markdown: `prettier`
   - LSP fallback enabled on save
 
 ## Keymaps (Selected)

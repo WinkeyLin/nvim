@@ -12,12 +12,16 @@ return {
   lazy = false,
   priority = 1000,
   cmd = { "TSInstall", "TSInstallFromGrammar", "TSUpdate", "TSUninstall", "TSLog" },
-  build = ":TSUpdate",
+  build = function()
+    local treesitter = require("nvim-treesitter")
+
+    treesitter.install(parser_languages):wait(300000)
+    treesitter.update(parser_languages):wait(300000)
+  end,
   config = function()
     local treesitter = require("nvim-treesitter")
 
     treesitter.setup()
-    treesitter.install(parser_languages)
 
     local group = vim.api.nvim_create_augroup("nvim_treesitter_features", { clear = true })
     vim.api.nvim_create_autocmd("FileType", {
